@@ -3,21 +3,16 @@ package com.murun.authserver.main;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.SecurityFilterAutoConfiguration;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
-
-@EnableOAuth2Client
-
-@SpringBootApplication(exclude={SecurityFilterAutoConfiguration.class, SecurityAutoConfiguration.class})
-public class AuthServer extends WebSecurityConfigurerAdapter  {
+import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 
 
+@SpringBootApplication(exclude={HibernateJpaAutoConfiguration.class, JpaRepositoriesAutoConfiguration.class, JpaBaseConfiguration.class})
+public class AuthServer{
 
-    public static void main(String[] arguments) {
-
-        SpringApplication.run(AuthServer.class, arguments);
+    public static void main(String[] args) {
+        SpringApplication.run(AuthServer.class, args);
     }
 
 

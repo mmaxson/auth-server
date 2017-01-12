@@ -8,6 +8,8 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.approval.ApprovalStore;
 import org.springframework.security.oauth2.provider.approval.TokenApprovalStore;
@@ -17,6 +19,8 @@ import org.springframework.security.oauth2.provider.request.DefaultOAuth2Request
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 
+import javax.sql.DataSource;
+
 @Configuration
 @EnableWebSecurity
 public class OAuth2SecurityConfiguration extends WebSecurityConfigurerAdapter {
@@ -24,20 +28,38 @@ public class OAuth2SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Autowired
     private ClientDetailsService clientDetailsService;
 
+
     @Autowired
+    private DataSource dataSource;
+
+  /*  @Autowired
     public void globalUserDetails(AuthenticationManagerBuilder auth) throws Exception {
         auth.inMemoryAuthentication()
                 .withUser("bill").password("abc123").roles("ADMIN").and()
                 .withUser("bob").password("abc123").roles("USER");
+    }*/
+
+    @Autowired
+    public void globalUserDetails(AuthenticationManagerBuilder auth) throws Exception {
+        auth.jdbcAuthentication()
+                .dataSource(dataSource)
+                .usersByUsernameQuery("select username, password, enabled from users where username=?")
+                .authoritiesByUsernameQuery("select b.username, a.role from user_roles a, users b where b.username=? and a.user_id = b.user_id")
+                .passwordEncoder(passwordEncoder());
+    }
+
+    public PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
     }
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
         http
-                .csrf().disable();
-                /*.anonymous().disable()
+                .csrf().disable()
+                .anonymous().disable()
                 .authorizeRequests()
-                .antMatchers("/oauth/token").permitAll();*/
+                .antMatchers("/oauth/token").permitAll().and()
+                .authorizeRequests().antMatchers("/oauth/check_token").permitAll();
     }
 
     @Bean

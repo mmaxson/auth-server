@@ -1,0 +1,57 @@
+<configuration debug="true" scan="true" scanPeriod="30 seconds">
+    <property name="LOG_PATH" value="${catalina.base}/logs"/>
+    <property name="LOG_ARCHIVE" value="${LOG_PATH}/archive" />
+
+    <timestamp key="timestamp-by-second" datePattern="yyyyMMdd'T'HHmmss"/>
+
+    <appender name="Console-Appender" class="ch.qos.logback.core.ConsoleAppender">
+        <layout>
+            <pattern>%msg%n</pattern>
+        </layout>
+    </appender>
+
+    <appender name="File-Appender" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_PATH}/logfile-${timestamp-by-second}.log</file>
+        <encoder>
+            <pattern>%msg%n</pattern>
+            <outputPatternAsHeader>true</outputPatternAsHeader>
+        </encoder>
+    </appender>
+
+    <appender name="RollingFile-Appender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/rollingfile.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_ARCHIVE}/rollingfile.log%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>1KB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="Async-Appender" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="RollingFile-Appender" />
+    </appender>
+
+    <logger name="com.murun.fict"  level="info" additivity="false">
+        <appender-ref ref="Console-Appender" />
+        <appender-ref ref="File-Appender" />
+        <appender-ref ref="Async-Appender" />
+    </logger>
+
+    <logger name="org.apache" level="INFO" />
+    <logger name="jacorb" level="WARN" />
+    <logger name="com.sun" level="WARN" />
+    <logger name="sun" level="WARN" />
+    <logger name="javax.xml.bind" level="WARN" />
+    <logger name="org.springframework" level="INFO" />
+    <logger name="org.hibernate" level="OFF" />
+    <logger name="httpclient.wire" level="WARN" />
+    <logger name="ch.qos.logback" level="WARN" />
+    <logger name="com.amazonaws" level="INFO" />
+
+    <root>
+        <appender-ref ref="${LOG_APPENDER}" />
+    </root>
+</configuration>

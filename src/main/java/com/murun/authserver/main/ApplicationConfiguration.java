@@ -1,25 +1,16 @@
-package com.murun.authserver.config;
+package com.murun.authserver.main;
 
 import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
+import com.murun.authserver.config.AuthorizationServerConfiguration;
+import com.murun.authserver.config.OAuth2SecurityConfiguration;
 import org.h2.server.web.WebServlet;
-import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.*;
 import org.springframework.core.env.Environment;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -29,26 +20,22 @@ import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import javax.annotation.Resource;
-import javax.sql.DataSource;
-import java.util.Properties;
 
 
 @EnableTransactionManagement
 @ComponentScan(basePackages="com.murun.*")
 
 
-@EnableJpaRepositories("com.murun.fict.*")
-@EnableCaching
 @Configuration
 @EnableSwagger2
 @RefreshScope
-@Import({ AuthorizationServerConfiguration.class })    //, OAuth2SecurityConfiguration.class
+@Import({ AuthorizationServerConfiguration.class, OAuth2SecurityConfiguration.class })
 
 public class ApplicationConfiguration {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    private static final String PROPERTY_NAME_DATABASE_DRIVER = "jdbc.driverClassName";
+   /* private static final String PROPERTY_NAME_DATABASE_DRIVER = "jdbc.driverClassName";
     private static final String PROPERTY_NAME_DATABASE_PASSWORD = "jdbc.password";
     private static final String PROPERTY_NAME_DATABASE_URL = "jdbc.url";
     private static final String PROPERTY_NAME_DATABASE_USERNAME = "jdbc.username";
@@ -66,8 +53,8 @@ public class ApplicationConfiguration {
     private static final String PROPERTY_NAME_HIBERNATE_ID_NEW_GENERATOR_MAPPINGS =  "hibernate.id.new_generator_mappings";
 
 
-    private static final String PROPERTY_VALUE_ENTITYMANAGER_PACKAGES_TO_SCAN = "com.murun.fict.*";
-
+    private static final String PROPERTY_VALUE_ENTITYMANAGER_PACKAGES_TO_SCAN = "com.murun.authserver.*";
+*/
 
     @Resource
     private Environment env;
@@ -82,7 +69,7 @@ public class ApplicationConfiguration {
     }
 
 
-    @Bean
+    /*@Bean
     public DataSource dataSource() {
 
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
@@ -92,9 +79,9 @@ public class ApplicationConfiguration {
         dataSource.setUsername(env.getRequiredProperty(PROPERTY_NAME_DATABASE_USERNAME));
         dataSource.setPassword((env.getRequiredProperty(PROPERTY_NAME_DATABASE_PASSWORD)));
         return dataSource;
-    }
+    }*/
 
-    @Bean
+    /*@Bean
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 
         LocalContainerEntityManagerFactoryBean entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
@@ -110,9 +97,9 @@ public class ApplicationConfiguration {
         entityManagerFactoryBean.afterPropertiesSet();
 
         return entityManagerFactoryBean;
-    }
+    }*/
 
-    private Properties hibProperties() {
+   /* private Properties hibProperties() {
         Properties properties = new Properties();
         properties.put(PROPERTY_NAME_HIBERNATE_DIALECT,	env.getRequiredProperty(PROPERTY_NAME_HIBERNATE_DIALECT));
         properties.put(PROPERTY_NAME_HIBERNATE_SHOW_SQL, env.getRequiredProperty(PROPERTY_NAME_HIBERNATE_SHOW_SQL));
@@ -124,19 +111,20 @@ public class ApplicationConfiguration {
         properties.put(PROPERTY_NAME_HIBERNATE_ID_NEW_GENERATOR_MAPPINGS, env.getRequiredProperty(PROPERTY_NAME_HIBERNATE_ID_NEW_GENERATOR_MAPPINGS));
 
         return properties;
-    }
-    @Bean
+    }*/
+
+   /* @Bean
     public JpaTransactionManager transactionManager() {
         JpaTransactionManager transactionManager = new JpaTransactionManager();
         transactionManager.setEntityManagerFactory(entityManagerFactory().getObject());
         return transactionManager;
-    }
+    }*/
 
-    @Primary
+   /* @Primary
     @Bean
     public Jackson2ObjectMapperBuilder configureObjectMapper() {
         return new Jackson2ObjectMapperBuilder().modulesToInstall(Hibernate5Module.class);
-    }
+    }*/
 
 
     @Bean
