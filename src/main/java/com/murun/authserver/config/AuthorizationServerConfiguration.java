@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
@@ -13,6 +14,7 @@ import org.springframework.security.oauth2.provider.approval.UserApprovalHandler
 import org.springframework.security.oauth2.provider.token.TokenStore;
 
 import javax.annotation.Resource;
+import javax.sql.DataSource;
 
 
 @EnableAuthorizationServer
@@ -23,6 +25,9 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
     @Resource
     private Environment env;
 
+
+    @Autowired
+    private DataSource dataSource;
 
     @Autowired
     @Qualifier("authenticationManagerBean")
@@ -46,6 +51,9 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 
+        clients.jdbc(dataSource).passwordEncoder(new BCryptPasswordEncoder());
+
+       /* // @formatter:off
         clients.inMemory()
                 .withClient( env.getProperty("security.oauth2.client.client-id"))
                 .authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")
@@ -54,6 +62,7 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
                 .secret(env.getProperty("security.oauth2.client.client-secret"))
                 .accessTokenValiditySeconds(60 * 1)
                 .refreshTokenValiditySeconds(600);
+        // @formatter:on*/
     }
 
     @Override

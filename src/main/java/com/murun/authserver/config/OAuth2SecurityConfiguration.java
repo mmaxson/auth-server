@@ -15,6 +15,8 @@ import org.springframework.security.oauth2.provider.approval.ApprovalStore;
 import org.springframework.security.oauth2.provider.approval.TokenApprovalStore;
 import org.springframework.security.oauth2.provider.approval.TokenStoreUserApprovalHandler;
 import org.springframework.security.oauth2.provider.client.InMemoryClientDetailsService;
+import org.springframework.security.oauth2.provider.client.JdbcClientDetailsService;
+import org.springframework.security.oauth2.provider.client.JdbcClientDetailsService;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
@@ -32,30 +34,18 @@ public class OAuth2SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Autowired
     private DataSource dataSource;
 
-  /*  @Autowired
-    public void globalUserDetails(AuthenticationManagerBuilder auth) throws Exception {
-        auth.inMemoryAuthentication()
-                .withUser("bill").password("abc123").roles("ADMIN").and()
-                .withUser("bob").password("abc123").roles("USER");
-    }*/
-
     @Autowired
     public void globalUserDetails(AuthenticationManagerBuilder auth) throws Exception {
         auth.jdbcAuthentication()
                 .dataSource(dataSource)
                 .usersByUsernameQuery("select username, password, enabled from users where username=?")
                 .authoritiesByUsernameQuery("select b.username, a.role from user_roles a, users b where b.username=? and a.user_id = b.user_id")
-                .passwordEncoder(passwordEncoder());
-    }
-
-    public PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
+                .passwordEncoder(new BCryptPasswordEncoder());
     }
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
-        http
-                .csrf().disable()
+        http.csrf().disable()
                 .anonymous().disable()
                 .authorizeRequests()
                 .antMatchers("/oauth/token").permitAll().and()
@@ -64,7 +54,7 @@ public class OAuth2SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Bean
     public ClientDetailsService clientDetailsService() {
-        return new InMemoryClientDetailsService();
+        return new JdbcClientDetailsService(dataSource);
     }
 
     @Override
@@ -85,6 +75,7 @@ public class OAuth2SecurityConfiguration extends WebSecurityConfigurerAdapter {
         handler.setTokenStore(tokenStore);
         handler.setRequestFactory(new DefaultOAuth2RequestFactory(clientDetailsService));
         handler.setClientDetailsService(clientDetailsService);
+
         return handler;
     }
 

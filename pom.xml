@@ -127,11 +127,11 @@
                 <version>4.0.3</version>
                 <configuration>
                     <driver>com.mysql.jdbc.Driver</driver>
-                    <url>jdbc:mysql://localhost:3306/USER</url>
+                    <url>jdbc:mysql://localhost:3306/AUTH</url>
                     <user>app</user>
                     <password>hi</password>
                     <schemas>
-                        <schema>USER</schema>
+                        <schema>AUTH</schema>
                     </schemas>
                     <locations>
                         <location>classpath:db.migration.mysql</location>
