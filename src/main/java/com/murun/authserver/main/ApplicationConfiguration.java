@@ -1,6 +1,5 @@
 package com.murun.authserver.main;
 
-import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 import com.murun.authserver.config.AuthorizationServerConfiguration;
 import com.murun.authserver.config.OAuth2SecurityConfiguration;
 import org.h2.server.web.WebServlet;
