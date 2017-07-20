@@ -1,0 +1,25 @@
+
+
+
+
+Build:
+    mvn flyway:migrate
+
+
+    mvn clean package docker:build
+    docker build -t marku/auth-server target/docker
+    docker push marku/auth-server
+    docker pull marku/auth-server
+
+
+
+
+
+Run:
+
+    Local:
+
+    Docker:
+
+        docker run -d -p  8888:8888 -e 3306:3306   -e "LOG_APPENDER=Console-Appender"  -e SECURITY_USER_PASSWORD=s3cr3t -e SPRING_PROFILES_ACTIVE=aws -e CLOUD_CONFIG_USER_PASSWORD=marku -e CLOUD_CONFIG_IP=35.165.250.58 -e CLOUD_CONFIG_PORT=80   marku/auth-server --name auth-server
+              CLOUD_CONFIG_IP may need to be changed
