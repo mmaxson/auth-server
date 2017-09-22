@@ -1,5 +1,7 @@
 package com.murun.authserver.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +29,8 @@ import javax.sql.DataSource;
 @EnableWebSecurity
 public class OAuth2SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
     @Autowired
     private ClientDetailsService clientDetailsService;
 
@@ -47,8 +51,8 @@ public class OAuth2SecurityConfiguration extends WebSecurityConfigurerAdapter {
     public void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .anonymous().disable()
-                .authorizeRequests()
-                .antMatchers("/oauth/token").permitAll().and()
+                .authorizeRequests().antMatchers("/oauth/token").permitAll()
+                .and()
                 .authorizeRequests().antMatchers("/oauth/check_token").permitAll();
     }
 
