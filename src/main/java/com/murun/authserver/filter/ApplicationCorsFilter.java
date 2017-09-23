@@ -1,8 +1,11 @@
 package com.murun.authserver.filter;
 
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.springframework.core.annotation.Order;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.FilterConfig;
 import javax.servlet.Filter;
@@ -18,6 +21,11 @@ import org.springframework.core.Ordered;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class ApplicationCorsFilter implements Filter {
 
+    private static final String PROPERTY_NAME_ALLOWED_ORIGINS = "fict.allowed_origins";
+    private List<String> allowedOrigins;
+
+    private Environment env;
+
     public ApplicationCorsFilter() {
     }
 
@@ -25,11 +33,13 @@ public class ApplicationCorsFilter implements Filter {
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
         HttpServletResponse response = (HttpServletResponse) res;
         HttpServletRequest request = (HttpServletRequest) req;
-        response.setHeader("Access-Control-Allow-Origin", "*");
+        if ( allowedOrigins == null || !allowedOrigins.contains(request.getHeader("origin"))) {
+            chain.doFilter(req, res);
+            return;
+        }
 
-        // http://localhost:4200
-
-        response.setHeader("Access-Control-Allow-Methods", "*");
+        response.setHeader("Access-Control-Allow-Origin", request.getHeader("origin"));
+        response.setHeader("Access-Control-Allow-Methods", "POST,PUT,GET,DELETE,HEAD,OPTIONS");
         response.setHeader("Access-Control-Max-Age", "3600");
         response.setHeader("Access-Control-Allow-Headers", "Content-Type, Charset, Cache-Control, Authorization, Accept");
 
@@ -42,7 +52,9 @@ public class ApplicationCorsFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) {
+        allowedOrigins = Arrays.asList(env.getRequiredProperty(PROPERTY_NAME_ALLOWED_ORIGINS).split( " "));
     }
+
 
     @Override
     public void destroy() {

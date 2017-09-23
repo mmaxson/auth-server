@@ -67,6 +67,7 @@ public class AuthServerTest {
         mockMvc.perform(
                         post("/oauth/token")
                                 .header("Authorization", authorization)
+                                .header("origin","http://localhost:4200")
                                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                                 .param("username", "tester")
                                 .param("password", "password")
