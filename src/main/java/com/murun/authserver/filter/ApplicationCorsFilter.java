@@ -1,11 +1,13 @@
 package com.murun.authserver.filter;
 
 import org.springframework.core.env.Environment;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.core.annotation.Order;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import javax.annotation.Resource;
 import javax.servlet.ServletException;
 import javax.servlet.FilterConfig;
 import javax.servlet.Filter;
@@ -22,8 +24,10 @@ import org.springframework.core.Ordered;
 public class ApplicationCorsFilter implements Filter {
 
     private static final String PROPERTY_NAME_ALLOWED_ORIGINS = "fict.allowed_origins";
+
     private List<String> allowedOrigins;
 
+    @Resource
     private Environment env;
 
     public ApplicationCorsFilter() {
@@ -52,7 +56,10 @@ public class ApplicationCorsFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) {
-        allowedOrigins = Arrays.asList(env.getRequiredProperty(PROPERTY_NAME_ALLOWED_ORIGINS).split( " "));
+        if ( env.getRequiredProperty(PROPERTY_NAME_ALLOWED_ORIGINS) == null ) {
+            return;
+        }
+        allowedOrigins = Arrays.asList(  env.getRequiredProperty(PROPERTY_NAME_ALLOWED_ORIGINS).split( " "));
     }
 
 

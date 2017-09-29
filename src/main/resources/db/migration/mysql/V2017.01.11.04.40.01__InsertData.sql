@@ -1,7 +1,9 @@
 
 
-INSERT INTO auth.users(username,password,enabled) VALUES ('marku','$2a$04$YsZ/yp1UVJLLKOHQkqmVCO//Cs/yix1mPqs5IgH/0XGUlvNtqCgda', true);
-INSERT INTO auth.users(username,password,enabled) VALUES ('mmurun','$2a$04$aliVDVYwgdVUllCzdgJuxObDVoGsVc53LOH7g7gSk3BbFEJbXK29G', true);
+INSERT INTO auth.users(username, firstname, lastname, email, password, enabled) VALUES ('marku', 'mark', 'urun',
+'mmurun@gmail.com', '$2a$04$YsZ/yp1UVJLLKOHQkqmVCO//Cs/yix1mPqs5IgH/0XGUlvNtqCgda', true);
+INSERT INTO auth.users(username, firstname, lastname, email, password, enabled) VALUES ('mmurun', 'murat', 'urun',
+'mmurun@gmail.com', '$2a$04$aliVDVYwgdVUllCzdgJuxObDVoGsVc53LOH7g7gSk3BbFEJbXK29G', true);
 
 
 INSERT INTO auth.user_roles (USER_ID, role) VALUES (1, 'ROLE_USER');
