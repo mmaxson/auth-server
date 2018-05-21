@@ -1,5 +1,6 @@
 package com.murun.authserver.config;
 
+import com.murun.authserver.service.ApplicationTokenEnhancer;
 import com.murun.authserver.service.CustomUserDetailsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

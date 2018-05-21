@@ -1,5 +1,6 @@
 package com.murun.authserver.filter;
 
+import com.murun.authserver.config.ApplicationProperties;
 import org.springframework.core.env.Environment;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -23,21 +24,27 @@ import org.springframework.core.Ordered;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class ApplicationCorsFilter implements Filter {
 
-    private static final String PROPERTY_NAME_ALLOWED_ORIGINS = "fict.allowed_origins";
+   // private static final String PROPERTY_NAME_ALLOWED_ORIGINS = "fict.allowed_origins";
 
     private List<String> allowedOrigins;
 
+   // @Resource
+   // private Environment env;
+
     @Resource
-    private Environment env;
+    ApplicationProperties applicationProperties;
+
 
     public ApplicationCorsFilter() {
     }
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
+
         HttpServletResponse response = (HttpServletResponse) res;
         HttpServletRequest request = (HttpServletRequest) req;
-        if ( allowedOrigins == null || !allowedOrigins.contains(request.getHeader("origin"))) {
+        if ( ( allowedOrigins == null ) ||
+                ( !allowedOrigins.contains("/**") && !allowedOrigins.contains(request.getHeader("origin")))) {
             chain.doFilter(req, res);
             return;
         }
@@ -56,10 +63,11 @@ public class ApplicationCorsFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) {
-        if ( env.getRequiredProperty(PROPERTY_NAME_ALLOWED_ORIGINS) == null ) {
+
+        if ( applicationProperties.getApp().getAllowedOrigins() == null ) {
             return;
         }
-        allowedOrigins = Arrays.asList(  env.getRequiredProperty(PROPERTY_NAME_ALLOWED_ORIGINS).split( " "));
+        allowedOrigins = Arrays.asList(  applicationProperties.getApp().getAllowedOrigins().split( " "));
     }
 
 

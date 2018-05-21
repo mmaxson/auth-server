@@ -8,6 +8,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
@@ -49,12 +50,11 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
     @Resource
     private TokenEnhancer tokenEnhancer;
 
-
+    @Resource
+    NoOpPasswordEncoder passwordEncoder;
 
     @Resource
     private UserApprovalHandler userApprovalHandler;
-
-
 
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
@@ -63,9 +63,6 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
                  .authenticationManager(authenticationManager)
                  .approvalStore(approvalStore)
                  .tokenEnhancer(tokenEnhancer);
-
-              //   .userDetailsService(userDetailsService);
-
     }
 
     @Override
@@ -75,8 +72,11 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
 
     @Override
     public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
+
         oauthServer.realm(REALM + "/client");
         oauthServer.checkTokenAccess("permitAll()");
+   //     oauthServer.passwordEncoder(passwordEncoder);
+
     }
 
 
