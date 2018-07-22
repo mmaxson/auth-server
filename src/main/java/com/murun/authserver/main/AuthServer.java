@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 
 
-@SpringBootApplication(exclude={HibernateJpaAutoConfiguration.class, JpaRepositoriesAutoConfiguration.class})
+@SpringBootApplication()
 public class AuthServer{
 
     public static void main(String[] args) {
@@ -16,6 +16,6 @@ public class AuthServer{
     }
 
 
-
+//exclude={HibernateJpaAutoConfiguration.class, JpaRepositoriesAutoConfiguration.class}
 
 }

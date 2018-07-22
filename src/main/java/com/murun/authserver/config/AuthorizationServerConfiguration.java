@@ -66,18 +66,23 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
     }
 
     @Override
-    public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-        clients.jdbc(dataSource).passwordEncoder(new BCryptPasswordEncoder());
+    public void configure(ClientDetailsServiceConfigurer configurer) throws Exception {
+        configurer.jdbc(dataSource).passwordEncoder(new BCryptPasswordEncoder());
     }
 
     @Override
     public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
 
         oauthServer.realm(REALM + "/client");
-        oauthServer.checkTokenAccess("permitAll()");
-   //     oauthServer.passwordEncoder(passwordEncoder);
-
+        oauthServer.checkTokenAccess("hasAuthority('ROLE_TRUSTED_CLIENT')");
+    //    oauthServer.checkTokenAccess("permitAll()");
     }
 
+
+  /*  @Override
+    public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
+        oauthServer.tokenKeyAccess("isAnonymous() || hasAuthority('ROLE_TRUSTED_CLIENT')")
+                .checkTokenAccess("hasAuthority('ROLE_TRUSTED_CLIENT')");
+    }*/
 
 }

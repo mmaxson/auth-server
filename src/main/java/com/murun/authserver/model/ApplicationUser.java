@@ -6,9 +6,10 @@ import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.io.Serializable;
 import java.util.Collection;
 
-public class ApplicationUser extends User implements UserDetails, CredentialsContainer{
+public class ApplicationUser extends User implements UserDetails, CredentialsContainer {
 
     private String firstName;
     private String lastName;

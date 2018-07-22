@@ -9,9 +9,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.json.JacksonJsonParser;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.FilterChainProxy;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -36,6 +39,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.time.Instant;
+import java.util.Base64;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -48,37 +52,29 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 
-
-
 @ActiveProfiles("test")
 @RunWith(SpringRunner.class)
 
+@SpringBootTest(
+        webEnvironment=SpringBootTest.WebEnvironment.MOCK,
+        classes = AuthServer.class)
 @ContextConfiguration(classes= {ApplicationConfiguration.class})
 
-
-//@AutoConfigureMockMvc
-@WebAppConfiguration
-@SpringBootTest(classes = AuthServer.class)
-
+@AutoConfigureWebMvc
+@AutoConfigureMockMvc
 public class AuthServerTest {
 
-    @Autowired
-    private WebApplicationContext wac;
 
-   // @Autowired
-   // private FilterChainProxy springSecurityFilterChain;
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Rule
-    public WireMockRule wireMockRule = new WireMockRule(9001);
+    private String authorization = "Basic " + Base64.getEncoder().encodeToString("trusted-client:trusted-client-secret".getBytes());
 
-    @Before
-    public void setup() {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
-             //   .addFilter(springSecurityFilterChain).build();
-    }
+  /*  @Rule
+    public WireMockRule wireMockRule = new WireMockRule(9001);
+*/
+
 
 //    @Test
 //    public String obtainAccessToken() throws Exception {
@@ -104,26 +100,22 @@ public class AuthServerTest {
 //        return jsonParser.parseMap(resultString).get("access_token").toString();
 //    }
 
-    //@Test
+    @Test
     public void passwordGrantTypeShouldReturnToken() throws Exception {
 
-        String authorization = "Basic "
-                + new String(Base64Utils.encode("trusted-client:trusted-client-secret".getBytes()));
 
-        String contentType = MediaType.APPLICATION_JSON + ";charset=UTF-8";
 
         // @formatter:off
-        mockMvc.perform(
-                        post("/oauth/token")
-                                .header("Authorization", authorization)
-                                .header("origin","http://localhost:4200")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .accept(MediaType.APPLICATION_JSON)
-                                .param("username", "notimportant")
-                                .param("password", "notimportant")
-                                .param("grant_type", "password"))
+        mockMvc.perform(post("/oauth/token")
+                .header("authorization", authorization)
+                .header("origin","http://localhost:7771")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .accept(MediaType.APPLICATION_JSON)
+                .param("username", "tester")
+                .param("password", "bogus")
+                .param("grant_type", "password"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(contentType))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$.access_token", is(notNullValue())))
                 .andExpect(jsonPath("$.token_type", is(equalTo("bearer"))))
                // .andExpect(jsonPath("$.refresh_token", is(notNullValue())))
@@ -132,35 +124,48 @@ public class AuthServerTest {
 
         // @formatter:on
 
-
     }
 
 
     @Test
-    public void shouldReturnTokenForPasswordGrantType() throws Exception {
+    public void shouldValidateToken() throws Exception {
 
-        String contentType = MediaType.APPLICATION_JSON + ";charset=UTF-8";
 
-        long unixTimestamp = Instant.now().plusSeconds(10).getEpochSecond();
-        stubFor(com.github.tomakehurst.wiremock.client.WireMock.post(urlPathEqualTo("/oauth/token"))
-                .withBasicAuth("trusted-client", "trusted-client-secret")
-                .withQueryParam("username", WireMock.equalTo("tester"))
-                .withQueryParam("password", WireMock.equalTo("password"))
-                .withQueryParam("grant_type", WireMock.equalTo("password"))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withBody("{\"access_token\":\"token\",\"token_type\":\"bearer\",\"expires_in\":59,\"scope\":\"read  write  trust\"}")));
 
         // @formatter:off
+        ResultActions result = mockMvc.perform(post("/oauth/token")
+                .header("authorization", authorization)
+                .header("origin","http://localhost:7771")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .accept(MediaType.APPLICATION_JSON)
+                .param("username", "tester")
+                .param("password", "bogus")
+                .param("grant_type", "password"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$.access_token", is(notNullValue())))
+                .andExpect(jsonPath("$.token_type", is(equalTo("bearer"))))
+                // .andExpect(jsonPath("$.refresh_token", is(notNullValue())))
+                .andExpect(jsonPath("$.expires_in", is(greaterThan(30))))
+                .andExpect(jsonPath("$.scope", is(equalTo("read  write  trust"))));
+
+        String resultString = result.andReturn().getResponse().getContentAsString();
+        JacksonJsonParser jsonParser = new JacksonJsonParser();
+        String token = jsonParser.parseMap(resultString).get("access_token").toString();
+
 
         mockMvc.perform( get("/oauth/check_token")
-                                .param("token", "token"))
+                .header("authorization", authorization)
+                .header("origin","http://localhost:7771")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .accept(MediaType.APPLICATION_JSON)
+                .param("token", token))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(contentType))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$.user_name", is(equalTo("tester"))))
-                .andExpect(jsonPath("$.authorities", is(equalTo("ROLE_ADMIN\",\"ROLE_USER"))))
-                .andExpect(jsonPath("$.client_id", is(equalTo("trusted-client"))))
-                .andExpect(jsonPath("$.scope", is(equalTo("read  write  trust"))));
+             //   .andExpect(jsonPath("$.authorities", is(equalTo("<[{\"authority\":\"ROLE_ADMIN\"},{\"authority\":\"ROLE_USER\"}]>"))))
+                .andExpect(jsonPath("$.client_id", is(equalTo("trusted-client"))));
+            //    .andExpect(jsonPath("$.scope", is(equalTo("<[\"read\",\" write\",\" trust\"]>"))));
 
         // @formatter:on
 

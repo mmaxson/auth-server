@@ -2,7 +2,7 @@ package com.murun.authserver.main;
 
 import com.murun.authserver.config.AuthorizationServerConfiguration;
 import com.murun.authserver.config.OAuth2SecurityConfiguration;
-import org.h2.server.web.WebServlet;
+//import org.h2.server.web.WebServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -42,13 +42,13 @@ public class ApplicationConfiguration {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 
-    @Profile("dev")
+    /*@Profile("dev")
     @Bean
     ServletRegistrationBean h2servletRegistration(){
         ServletRegistrationBean registrationBean = new ServletRegistrationBean(new WebServlet());
         registrationBean.addUrlMappings("/console/*");
         return registrationBean;
-    }
+    }*/
 
     @SuppressWarnings("deprecation")
     @Bean
@@ -57,7 +57,7 @@ public class ApplicationConfiguration {
         return (NoOpPasswordEncoder) NoOpPasswordEncoder.getInstance();
     }
 
-    @Bean
+   /* @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
@@ -71,6 +71,7 @@ public class ApplicationConfiguration {
     }
 
     @Bean
+
     FilterRegistrationBean<CorsFilter> corsFilter(CorsConfigurationSource corsConfigurationSource) {
         CorsFilter corsFilter = new CorsFilter(corsConfigurationSource);
 
@@ -78,7 +79,8 @@ public class ApplicationConfiguration {
         bean.setFilter(corsFilter);
         bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
         return bean;
-    }
+    }*/
+
     @Bean
     public Docket api() {
         return new Docket(DocumentationType.SPRING_WEB)
