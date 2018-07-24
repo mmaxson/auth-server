@@ -4,7 +4,8 @@ Database:
     passwords are encrypted with https://www.dailycred.com/article/bcrypt-calculator  (round 4)
 
 Build:
-    mvn flyway:migrate
+    mvn flyway:migrate (mvn flyway:repair after a failure; 
+    mvn flyway:clean, mvn flyway:migrate to run all scripts from start
 
 
     mvn clean package docker:build

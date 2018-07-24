@@ -21,9 +21,10 @@ public class ApplicationTokenEnhancer implements TokenEnhancer {
 
         additionalInfo.put("email", user.getEmail());
         additionalInfo.put("authorities", user.getAuthorities());
-
-
+//System.out.println(authentication.getUserAuthentication().getAuthorities().iterator());
+System.out.println(accessToken.getRefreshToken() + "===================================");
         ((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(additionalInfo);
+
 
         return accessToken;
     }

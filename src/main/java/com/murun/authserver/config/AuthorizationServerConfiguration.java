@@ -75,7 +75,7 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
 
         oauthServer.realm(REALM + "/client");
         oauthServer.checkTokenAccess("hasAuthority('ROLE_TRUSTED_CLIENT')");
-    //    oauthServer.checkTokenAccess("permitAll()");
+      //  oauthServer.checkTokenAccess("permitAll()");
     }
 
 

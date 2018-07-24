@@ -1,54 +1,27 @@
 package main;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
 import com.murun.authserver.main.ApplicationConfiguration;
 import com.murun.authserver.main.AuthServer;
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.json.JacksonJsonParser;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.web.FilterChainProxy;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
-
 import org.springframework.test.web.servlet.MockMvc;
-
-
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.util.Base64Utils;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.context.WebApplicationContext;
 
-import java.time.Instant;
 import java.util.Base64;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 
@@ -100,15 +73,10 @@ public class AuthServerTest {
 //        return jsonParser.parseMap(resultString).get("access_token").toString();
 //    }
 
-    @Test
-    public void passwordGrantTypeShouldReturnToken() throws Exception {
-
-
-
+    public String obtainToken( String tokenType ) throws Exception{
         // @formatter:off
-        mockMvc.perform(post("/oauth/token")
+        ResultActions result = mockMvc.perform(post("/oauth/token")
                 .header("authorization", authorization)
-                .header("origin","http://localhost:7771")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .accept(MediaType.APPLICATION_JSON)
                 .param("username", "tester")
@@ -118,8 +86,34 @@ public class AuthServerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$.access_token", is(notNullValue())))
                 .andExpect(jsonPath("$.token_type", is(equalTo("bearer"))))
-               // .andExpect(jsonPath("$.refresh_token", is(notNullValue())))
-                .andExpect(jsonPath("$.expires_in", is(greaterThan(30))))
+                .andExpect(jsonPath("$.refresh_token", is(notNullValue())))
+                .andExpect(jsonPath("$.expires_in", is(greaterThan(598))))
+                .andExpect(jsonPath("$.scope", is(equalTo("read  write  trust"))));
+
+        // @formatter:on
+
+        String resultString = result.andReturn().getResponse().getContentAsString();
+        JacksonJsonParser jsonParser = new JacksonJsonParser();
+        return jsonParser.parseMap(resultString).get(tokenType).toString();
+    }
+
+    @Test
+    public void passwordGrantTypeShouldReturnToken() throws Exception {
+
+        // @formatter:off
+        mockMvc.perform(post("/oauth/token")
+                .header("authorization", authorization)
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .accept(MediaType.APPLICATION_JSON)
+                .param("username", "tester")
+                .param("password", "bogus")
+                .param("grant_type", "password"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$.access_token", is(notNullValue())))
+                .andExpect(jsonPath("$.token_type", is(equalTo("bearer"))))
+                .andExpect(jsonPath("$.refresh_token", is(notNullValue())))
+                .andExpect(jsonPath("$.expires_in", is(greaterThan(598))))
                 .andExpect(jsonPath("$.scope", is(equalTo("read  write  trust"))));
 
         // @formatter:on
@@ -130,33 +124,10 @@ public class AuthServerTest {
     @Test
     public void shouldValidateToken() throws Exception {
 
-
-
-        // @formatter:off
-        ResultActions result = mockMvc.perform(post("/oauth/token")
-                .header("authorization", authorization)
-                .header("origin","http://localhost:7771")
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .accept(MediaType.APPLICATION_JSON)
-                .param("username", "tester")
-                .param("password", "bogus")
-                .param("grant_type", "password"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(jsonPath("$.access_token", is(notNullValue())))
-                .andExpect(jsonPath("$.token_type", is(equalTo("bearer"))))
-                // .andExpect(jsonPath("$.refresh_token", is(notNullValue())))
-                .andExpect(jsonPath("$.expires_in", is(greaterThan(30))))
-                .andExpect(jsonPath("$.scope", is(equalTo("read  write  trust"))));
-
-        String resultString = result.andReturn().getResponse().getContentAsString();
-        JacksonJsonParser jsonParser = new JacksonJsonParser();
-        String token = jsonParser.parseMap(resultString).get("access_token").toString();
-
+        String token = obtainToken("access_token");
 
         mockMvc.perform( get("/oauth/check_token")
                 .header("authorization", authorization)
-                .header("origin","http://localhost:7771")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .accept(MediaType.APPLICATION_JSON)
                 .param("token", token))
@@ -171,4 +142,30 @@ public class AuthServerTest {
 
 
     }
+
+
+    @Test
+    public void refreshTokenGrantTypeShouldReturnToken() throws Exception {
+
+        String refresh_token = obtainToken("refresh_token");
+
+        // @formatter:off
+        mockMvc.perform(post("/oauth/token")
+                .header("authorization", authorization)
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .accept(MediaType.APPLICATION_JSON)
+                .param("grant_type", "refresh_token")
+                .param("refresh_token", refresh_token))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$.access_token", is(notNullValue())))
+                .andExpect(jsonPath("$.token_type", is(equalTo("bearer"))))
+                .andExpect(jsonPath("$.refresh_token", is(notNullValue())))
+                .andExpect(jsonPath("$.expires_in", is(greaterThan(598))))
+                .andExpect(jsonPath("$.scope", is(equalTo("read  write  trust"))));
+
+        // @formatter:on
+
+    }
+
 }

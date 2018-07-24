@@ -57,7 +57,7 @@ public class ApplicationConfiguration {
         return (NoOpPasswordEncoder) NoOpPasswordEncoder.getInstance();
     }
 
-   /* @Bean
+    @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
@@ -71,7 +71,6 @@ public class ApplicationConfiguration {
     }
 
     @Bean
-
     FilterRegistrationBean<CorsFilter> corsFilter(CorsConfigurationSource corsConfigurationSource) {
         CorsFilter corsFilter = new CorsFilter(corsConfigurationSource);
 
@@ -79,7 +78,7 @@ public class ApplicationConfiguration {
         bean.setFilter(corsFilter);
         bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
         return bean;
-    }*/
+    }
 
     @Bean
     public Docket api() {

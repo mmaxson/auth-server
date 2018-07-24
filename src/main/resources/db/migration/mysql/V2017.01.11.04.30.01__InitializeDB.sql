@@ -1,6 +1,7 @@
 
 
-create schema auth;
+
+--create schema auth;
 
 CREATE TABLE AUTH.Users (
   USER_ID INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -38,4 +39,7 @@ create table AUTH.oauth_client_details (
   additional_information VARCHAR(4096),
   autoapprove VARCHAR(256)
 );
+
+
+
 

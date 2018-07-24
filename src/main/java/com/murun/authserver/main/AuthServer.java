@@ -16,6 +16,5 @@ public class AuthServer{
     }
 
 
-//exclude={HibernateJpaAutoConfiguration.class, JpaRepositoriesAutoConfiguration.class}
 
 }
